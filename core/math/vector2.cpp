@@ -41,22 +41,31 @@ Vector2 Vector2::from_angle(const real_t p_angle) {
 	return Vector2(Math::cos(p_angle), Math::sin(p_angle));
 }
 
+
+//Reuse length_squared() where applicable to 
+//reduce redundant square root calculations
+
 real_t Vector2::length() const {
-	return Math::sqrt(x * x + y * y);
+    return Math::sqrt(length_squared());
 }
+
 
 real_t Vector2::length_squared() const {
 	return x * x + y * y;
 }
 
+
+//optimized normalization
 void Vector2::normalize() {
-	real_t l = x * x + y * y;
-	if (l != 0) {
-		l = Math::sqrt(l);
-		x /= l;
-		y /= l;
-	}
+    real_t l = length_squared();
+    if (l != 0) {
+        l = Math::sqrt(l);
+        x /= l;
+        y /= l;
+    }
 }
+
+
 
 Vector2 Vector2::normalized() const {
 	Vector2 v = *this;
@@ -64,17 +73,22 @@ Vector2 Vector2::normalized() const {
 	return v;
 }
 
+
 bool Vector2::is_normalized() const {
 	// use length_squared() instead of length() to avoid sqrt(), makes it more stringent.
 	return Math::is_equal_approx(length_squared(), 1, (real_t)UNIT_EPSILON);
 }
 
 real_t Vector2::distance_to(const Vector2 &p_vector2) const {
-	return Math::sqrt((x - p_vector2.x) * (x - p_vector2.x) + (y - p_vector2.y) * (y - p_vector2.y));
+    return Math::sqrt(distance_squared_to(p_vector2));
 }
+//Optimize Distance Calculations: Optimize distance and distance 
+//squared calculations by avoiding repetitive multiplications.
 
 real_t Vector2::distance_squared_to(const Vector2 &p_vector2) const {
-	return (x - p_vector2.x) * (x - p_vector2.x) + (y - p_vector2.y) * (y - p_vector2.y);
+    real_t dx = x - p_vector2.x;
+    real_t dy = y - p_vector2.y;
+    return dx * dx + dy * dy;
 }
 
 real_t Vector2::angle_to(const Vector2 &p_vector2) const {
